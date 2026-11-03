@@ -1,5 +1,5 @@
-import { AppService } from "@/src/app.service";
-import { Controller, Get } from "@nestjs/common";
+import { Controller, Get } from '@nestjs/common';
+import { AppService } from './app.service.js';
 
 @Controller()
 export class AppController {
@@ -8,12 +8,5 @@ export class AppController {
   @Get()
   getHello(): string {
     return this.appService.getHello();
-  }
-
-  @Get('health')
-  healthCheck() {
-    // The middleware in main.ts will automatically 
-    // attach the CSRF cookies to this response.
-    return { status: 'ok', timestamp: new Date().toISOString() };
   }
 }

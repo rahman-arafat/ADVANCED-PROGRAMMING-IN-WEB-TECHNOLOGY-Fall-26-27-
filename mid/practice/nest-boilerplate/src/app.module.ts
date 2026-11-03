@@ -1,28 +1,35 @@
-import { Module } from "@nestjs/common";
-import { ConfigModule } from "@nestjs/config";
-import { PostgresDatabaseProviderModule } from "@/providers/database/postgres/provider.module";
-import { AppController } from "@/src/app.controller";
-import { AppService } from "@/src/app.service";
-import global_config from "@/config/global_config";
-import { BullModule } from "@nestjs/bull";
+
+import { Module } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
+
+import { ProductsModule } from './products/products.module.js';
+import { EmployeesModule } from './employees/employees.module.js';
 
 @Module({
   imports: [
-    PostgresDatabaseProviderModule,
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
 
-    ConfigModule.forRoot({
-      isGlobal: true,
-      load: [],
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        type: 'postgres',
+        host: config.get<string>('DB_HOST'),
+        port: Number(config.get('DB_PORT')),
+        username: config.get<string>('DB_USERNAME'),
+        password: config.get<string>('DB_PASSWORD'),
+        database: config.get<string>('DB_DATABASE'),
+        autoLoadEntities: true,
+        // synchronize: true,
+        synchronize: true,
+      }),
     }),
-    BullModule.forRoot({
-      url: process.env.REDIS_URL,
-    }),
-    ConfigModule.forRoot({
-      isGlobal: true,
-      load: [global_config],
-    }),
+
+    ProductsModule,
+    EmployeesModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
 })
 export class AppModule {}
